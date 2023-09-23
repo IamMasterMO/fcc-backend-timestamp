@@ -24,9 +24,32 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
+app.get("/api/:date?", (req, res) => {
+  const queryDate = req.params.date || "";
+  let unixDate;
 
+  // unix時間もミリ秒で
+
+  if (queryDate === "") {             // 空文字なら
+    unixDate = new Date().getTime();
+  } else if (!isNaN(queryDate)) {         // 数値（unix?）なら
+    unixDate = parseInt(queryDate);
+  } else {                           // 文字列なら
+    unixDate = new Date(queryDate).getTime();
+  }
+
+  if (isNaN(unixDate)) {
+    res.status(400).json({ error : "Invalid Date"});
+  } else {
+    const utcDate = new Date(unixDate).toUTCString();
+    res.json({
+      "unix": unixDate,
+      "utc": utcDate
+    });
+  }
+});
 
 // listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
+var listener = app.listen(process.env.PORT || 3000, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
